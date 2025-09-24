@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go-users-simple-crud/model"
 	"go-users-simple-crud/repository/entity"
+	"go-users-simple-crud/repository/mapper"
 	"sync"
 )
 
@@ -28,26 +29,17 @@ func (u *UserInMemory) FindByID(id int64) (model.User, error) {
 	if !ok {
 		return model.User{}, fmt.Errorf("find user by id failed: %w", ErrItemNotFound)
 	}
-	return model.User{
-		ID:        user.ID,
-		Name:      user.Name,
-		Email:     user.Email,
-		BirthDate: user.BirthDate,
-	}, nil
+	return mapper.UserEntityToUserModel(user), nil
 }
 
 func (u *UserInMemory) Save(user model.User) (model.User, error) {
 	u.Lock()
 	defer u.Unlock()
 	id := int64(len(u.users) + 1)
-	u.users[id] = entity.User{
-		ID:        id,
-		Name:      user.Name,
-		Email:     user.Email,
-		BirthDate: user.BirthDate,
-	}
-	user.ID = id
-	return user, nil
+	userEntity := mapper.UserModelToUserEntity(user)
+	userEntity.ID = id
+	u.users[id] = userEntity
+	return mapper.UserEntityToUserModel(userEntity), nil
 }
 
 func (u *UserInMemory) Delete(id int64) error {
@@ -66,11 +58,8 @@ func (u *UserInMemory) Update(user model.User) error {
 	if _, ok := u.users[user.ID]; !ok {
 		return fmt.Errorf("update user failed: %w", ErrItemNotFound)
 	}
-	u.users[user.ID] = entity.User{
-		Name:      user.Name,
-		Email:     user.Email,
-		BirthDate: user.BirthDate,
-	}
+	userEntity := mapper.UserModelToUserEntity(user)
+	u.users[userEntity.ID] = userEntity
 	return nil
 }
 
