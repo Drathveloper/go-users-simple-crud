@@ -15,6 +15,7 @@ func WriteJSON(w http.ResponseWriter, data any, statusCode int) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
 	bodyBytes, err := json.Marshal(data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -24,7 +25,6 @@ func WriteJSON(w http.ResponseWriter, data any, statusCode int) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(statusCode)
 }
 
 func WriteError(w http.ResponseWriter, err error, statusCode int) {

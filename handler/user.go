@@ -53,6 +53,7 @@ func (h *User) RegisterUser() http.HandlerFunc {
 		var requestBody dto.RegisterUserRequest
 		if err := ReadJSON(r, &requestBody); err != nil {
 			WriteError(w, err, http.StatusBadRequest)
+			return
 		}
 		user, err := mapper.RegisterUserRequestToUser(requestBody)
 		if err != nil {
